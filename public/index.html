@@ -20,21 +20,7 @@
 <body>
 
 <script type="text/javascript">
-function get_all_tags(category) {
-  var tags_hash = {};
-
-  $("div[data-category='" + category + "']").each(function(index,elt) {
-    $(elt).attr("data-tags").split(" ").forEach(function(tag) {
-      tags_hash[tag] = true;
-    });
-  });
-
-  return tags_hash;
-}
-
 var last_selected = "nobody_at_all";
-var last_tag_selected = "nobody_at_all";
-var tags_shown = {};
 
 function select_major_category(category) {
   if(category.substring(1) == last_selected) return;
@@ -46,55 +32,10 @@ function select_major_category(category) {
   // Hide all divs in previous selected category
   $("div[data-category='" + last_selected + "']:visible").animate({height: 'hide'});
 
-  last_tag_selected = "nobody_at_all";
   last_selected = category.substring(1);
 
   // Show all divs in new category
   $("div[data-category='" + last_selected + "']:hidden").animate({height: 'show'});
-
-  $("#tagbox div").remove();
-  tags_shown = get_all_tags(last_selected);
-
-  $('<a href="#' + last_selected +
-    '/all"><div class="btn btn-primary">all</div></a>'
-    ).appendTo("#tagbox");
-  for(var tag in tags_shown) {
-    $('<a href="#' + last_selected + '/' + tag +
-      '"><div class="btn btn-primary">' +
-      tag + "</div></a>").appendTo("#tagbox");
-  }
-}
-
-function select_tag(tag) {
-  if(tag == last_tag_selected) return;
-
-  $("#tagbox").animate({top: "+=10"}, 'fast').animate({top: "-=10"}, 'fast');
-
-  // Get all elts in top-level category
-  var elts = $("div[data-category='" + last_selected + "']");
-
-  var sub_elts = $([]);
-  var not_sub_elts = $([]);
-
-  if(tag == "all") {
-    sub_elts = elts;
-  } else {
-    elts.each(function() {
-      var tag_list = $(this).attr("data-tags").split(" ");
-      for(var i = 0; i < tag_list.length; i++) {
-        if(tag_list[i] === tag) {
-          sub_elts.push(this);
-          return;
-        }
-      }
-      not_sub_elts.push(this);
-    });
-  }
-
-  not_sub_elts.animate({height: 'hide'});
-  sub_elts.animate({height: 'show'});
-
-  last_tag_selected = tag;
 }
 
 $(function() {
@@ -128,7 +69,6 @@ $(function() {
 
     tags = spot.split("/", 2);
     select_major_category(tags[0]);
-    select_tag(tags[1]);
   });
 
   $(".fancybox").fancybox({ closeClick: true });
@@ -193,8 +133,6 @@ $(function() {
 
 <div style="height:80px;"> </div>
 
-<div id="tagbox" style="height:80px;"> </div> <!-- For sub-buttons -->
-
 <!-- This is the HTML template for individual portfolio entries. -->
 <div id="template" class="panel panel-success" style="display:none">
   <div class="panel-heading"><h2><div class="title_here"></div></h2></div>
@@ -231,8 +169,8 @@ $(function() {
 </div>
 
 
-<div data-category="professional" data-tags="ruby rails cassandra">
-  <div class="title">That Big Work Project</div>
+<div data-category="professional">
+  <div class="title"> YoYoProject, the Pinnacle of My Career </div>
   <div class="dates"> 2011-2014 </div>
   <div class="organization"> YoYoDyne, Inc </div>
   <div class="description"> YoYoProject was originally designed for the
@@ -243,6 +181,17 @@ $(function() {
   <div class="pictures">
     <a class="fancybox" href="http://yoyodyne.com/yoyodyne.jpg">
       <img src="http://yoyodyne.com/yoyodyne.jpg" alt="YoYoDyne Logo" /> </a>
+  </div>
+</div>
+
+<div data-category="personal">
+  <div class="title">Fooling Around</div>
+  <div class="dates"> 2004-2011 </div>
+  <div class="description">I messed with stuff in a bunch of different tools and languages.</div>
+  <div class="tools"> Ruby on Rails, Node.js, InterCal </div>
+  <div class="pictures">
+    <a class="fancybox" href="http://belize-travel-blog.chaacreek.com/wp-content/uploads/2013/07/Fooling-around-with-the-Arts-supplies.jpg">
+      <img src="http://belize-travel-blog.chaacreek.com/wp-content/uploads/2013/07/Fooling-around-with-the-Arts-supplies.jpg" alt="Kid with big eyes" /> </a>
   </div>
 </div>
 
