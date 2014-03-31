@@ -1,5 +1,7 @@
-require "rack"
+require "sinatra"
 
-use Rack::ContentType
+get "/" do
+  "Hello, world!"
+end
 
-run proc { |env| [200, {}, ["Hello, world!"]] }
+run Sinatra::Application

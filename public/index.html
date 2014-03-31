@@ -6,7 +6,7 @@
   <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
   <meta name="description" content="A portfolio of programming and technical projects, professional and not, by Jane Downing" />
   <meta name="keywords" content="portfolio,programming,projects" />
-  <link href="css/bootstrap.slate.min.css" media="screen" rel="stylesheet" type="text/css" />
+  <link href="css/bootstrap.cerulean.min.css" media="screen" rel="stylesheet" type="text/css" />
   <link href="css/portfolio.css" media="screen" rel="stylesheet" type="text/css" />
   <link href="fancybox/jquery.fancybox.css" media="screen" rel="stylesheet" type="text/css" />
   <script type="text/javascript"
@@ -30,47 +30,6 @@ function get_all_tags(category) {
   });
 
   return tags_hash;
-}
-
-function find_dates(a) {
-  var date_string = $(a).find("div.dates").html();
-  var all_matches = date_string.match(/\d{4}/g);
-
-  var first_date = parseInt(Math.min.apply(null, all_matches));
-  var last_date = parseInt(Math.max.apply(null, all_matches));
-
-  return [first_date, last_date];
-}
-
-function sort_child_nodes(selector) {
-  var children = $(selector);
-  var parent = children.parent();
-
-  var child_array = [];
-  children.each(function() {
-    child_array.push(this);
-    $(this).remove();
-  });
-
-  // Sort on the most recent year found.
-  // With equal most recent years, sort on the least recent.
-  child_array.sort(function(a, b) {
-    var a_dates = find_dates(a);
-    var first_a = a_dates[0];
-    var last_a = a_dates[1];
-    var b_dates = find_dates(b);
-    var first_b = b_dates[0];
-    var last_b = b_dates[1];
-
-    if(last_a === last_b)
-      return first_b - first_a;
-
-    return last_b - last_a;
-  });
-
-  for(var i = 0; i < child_array.length; i++) {
-    $(parent).append(child_array[i]);
-  }
 }
 
 var last_selected = "nobody_at_all";
@@ -143,8 +102,6 @@ $(function() {
                         dates:true, pictures:true, title:true};
   var data_selector = "div[data-category=professional],div[data-category=personal]";
   var all_projects = $(data_selector);
-
-  sort_child_nodes(data_selector);
 
   // Replace every project div with a templatized version
   all_projects.each(function() {
@@ -239,8 +196,8 @@ $(function() {
 <div id="tagbox" style="height:80px;"> </div> <!-- For sub-buttons -->
 
 <!-- This is the HTML template for individual portfolio entries. -->
-<div id="template" class="panel panel-warning" style="display:none">
-  <div class="panel-heading"><h3><div class="title_here"></div></h3></div>
+<div id="template" class="panel panel-success" style="display:none">
+  <div class="panel-heading"><h2><div class="title_here"></div></h2></div>
   <div class="panel-body">
     <div class="row well">
       <div class="col-md-4"><div class="dates_here">
@@ -275,17 +232,17 @@ $(function() {
 
 
 <div data-category="professional" data-tags="ruby rails cassandra">
-  <div class="title">Analytics for Ooyala</div>
-  <div class="dates"> 2011-2012 </div>
-  <div class="organization"> <a href="http://ooyala.com">Ooyala</a> </div>
-  <div class="description"> Ooyala's Backlot </div>
-  <div class="tools"> Ruby, Rails, git, Cassandra, MySQL, others </div>
-  <div class="role"> Analytics and Big Data Engineer </div>
+  <div class="title">That Big Work Project</div>
+  <div class="dates"> 2011-2014 </div>
+  <div class="organization"> YoYoDyne, Inc </div>
+  <div class="description"> YoYoProject was originally designed for the
+    kersquirbulation of frobjits, but was later repurposed into a
+    calculator of squirrel migration patterns. </div>
+  <div class="tools"> LolCode, Visual LolCode, Visual SourceSafe </div>
+  <div class="role"> Primary Static Source Analysis Engineer </div>
   <div class="pictures">
-    <a class="fancybox" href="ooyala-backlot-analytics-1.png">
-      <img src="ooyala-backlot-analytics-1.png" alt="Ooyala Backlot 1" /> </a>
-    <a class="fancybox" href="ooyala-backlot-2.jpg">
-      <img src="ooyala-backlot-2.jpg" alt="Ooyala Backlot 2" /> </a>
+    <a class="fancybox" href="http://yoyodyne.com/yoyodyne.jpg">
+      <img src="http://yoyodyne.com/yoyodyne.jpg" alt="YoYoDyne Logo" /> </a>
   </div>
 </div>
 
