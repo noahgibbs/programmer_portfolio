@@ -1,0 +1,297 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+  <meta name="description" content="A portfolio of programming and technical projects, professional and not, by Jane Downing" />
+  <meta name="keywords" content="portfolio,programming,projects" />
+  <link href="css/bootstrap.slate.min.css" media="screen" rel="stylesheet" type="text/css" />
+  <link href="css/portfolio.css" media="screen" rel="stylesheet" type="text/css" />
+  <link href="fancybox/jquery.fancybox.css" media="screen" rel="stylesheet" type="text/css" />
+  <script type="text/javascript"
+    src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js">
+  </script>
+  <script type="text/javascript" src="js/bootstrap.min.js"> </script>
+  <script type="text/javascript" src="fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="fancybox/jquery.mousewheel-3.0.6.pack.js"></script>
+  <title> Jane Downing's Programming Portfolio </title>
+</head>
+<body>
+
+<script type="text/javascript">
+function get_all_tags(category) {
+  var tags_hash = {};
+
+  $("div[data-category='" + category + "']").each(function(index,elt) {
+    $(elt).attr("data-tags").split(" ").forEach(function(tag) {
+      tags_hash[tag] = true;
+    });
+  });
+
+  return tags_hash;
+}
+
+function find_dates(a) {
+  var date_string = $(a).find("div.dates").html();
+  var all_matches = date_string.match(/\d{4}/g);
+
+  var first_date = parseInt(Math.min.apply(null, all_matches));
+  var last_date = parseInt(Math.max.apply(null, all_matches));
+
+  return [first_date, last_date];
+}
+
+function sort_child_nodes(selector) {
+  var children = $(selector);
+  var parent = children.parent();
+
+  var child_array = [];
+  children.each(function() {
+    child_array.push(this);
+    $(this).remove();
+  });
+
+  // Sort on the most recent year found.
+  // With equal most recent years, sort on the least recent.
+  child_array.sort(function(a, b) {
+    var a_dates = find_dates(a);
+    var first_a = a_dates[0];
+    var last_a = a_dates[1];
+    var b_dates = find_dates(b);
+    var first_b = b_dates[0];
+    var last_b = b_dates[1];
+
+    if(last_a === last_b)
+      return first_b - first_a;
+
+    return last_b - last_a;
+  });
+
+  for(var i = 0; i < child_array.length; i++) {
+    $(parent).append(child_array[i]);
+  }
+}
+
+var last_selected = "nobody_at_all";
+var last_tag_selected = "nobody_at_all";
+var tags_shown = {};
+
+function select_major_category(category) {
+  if(category.substring(1) == last_selected) return;
+
+  // Set active tab
+  $("#navbar-main li").removeClass("active");
+  $("#navbar-main li a[href='" + category + "/all']").parent().addClass("active");
+
+  // Hide all divs in previous selected category
+  $("div[data-category='" + last_selected + "']:visible").animate({height: 'hide'});
+
+  last_tag_selected = "nobody_at_all";
+  last_selected = category.substring(1);
+
+  // Show all divs in new category
+  $("div[data-category='" + last_selected + "']:hidden").animate({height: 'show'});
+
+  $("#tagbox div").remove();
+  tags_shown = get_all_tags(last_selected);
+
+  $('<a href="#' + last_selected +
+    '/all"><div class="btn btn-primary">all</div></a>'
+    ).appendTo("#tagbox");
+  for(var tag in tags_shown) {
+    $('<a href="#' + last_selected + '/' + tag +
+      '"><div class="btn btn-primary">' +
+      tag + "</div></a>").appendTo("#tagbox");
+  }
+}
+
+function select_tag(tag) {
+  if(tag == last_tag_selected) return;
+
+  $("#tagbox").animate({top: "+=10"}, 'fast').animate({top: "-=10"}, 'fast');
+
+  // Get all elts in top-level category
+  var elts = $("div[data-category='" + last_selected + "']");
+
+  var sub_elts = $([]);
+  var not_sub_elts = $([]);
+
+  if(tag == "all") {
+    sub_elts = elts;
+  } else {
+    elts.each(function() {
+      var tag_list = $(this).attr("data-tags").split(" ");
+      for(var i = 0; i < tag_list.length; i++) {
+        if(tag_list[i] === tag) {
+          sub_elts.push(this);
+          return;
+        }
+      }
+      not_sub_elts.push(this);
+    });
+  }
+
+  not_sub_elts.animate({height: 'hide'});
+  sub_elts.animate({height: 'show'});
+
+  last_tag_selected = tag;
+}
+
+$(function() {
+  var project_fields = {organization:true, description:true, tools:true, role:true,
+                        dates:true, pictures:true, title:true};
+  var data_selector = "div[data-category=professional],div[data-category=personal]";
+  var all_projects = $(data_selector);
+
+  sort_child_nodes(data_selector);
+
+  // Replace every project div with a templatized version
+  all_projects.each(function() {
+    var field_objs = {};
+    for(var field in project_fields) {
+      field_objs[field] = $(this).find("." + field).remove();
+    }
+    $(this).attr("class", $("#template").attr("class"));
+    $(this).html($("#template").html()).hide();
+    for(var field in project_fields) {
+      var spot = $(this).find("." + field + "_here");
+      field_objs[field].appendTo(spot);
+    }
+    var title_elt = field_objs["title"].length > 0 ?
+      field_objs["title"] : field_objs["organization"];
+    $(this).find(".title_here").html(title_elt.html());
+  });
+
+  $("img").addClass("shadow");
+
+  $(window).bind( 'hashchange', function() {
+    spot = location.hash;
+    if(spot == "") { spot = "#professional/all"; location.hash = spot; }
+
+    tags = spot.split("/", 2);
+    select_major_category(tags[0]);
+    select_tag(tags[1]);
+  });
+
+  $(".fancybox").fancybox({ closeClick: true });
+  $(".fancybox_iframe").fancybox({
+    closeClick: true,
+    type: 'iframe'
+  });
+
+  $(window).trigger('hashchange');
+});
+</script>
+
+    <div class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="http://static.angelbob.com/portfolio" class="navbar-brand">Jane Downing - Software Portfolio</a>
+          <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+        <div class="navbar-collapse collapse" id="navbar-main">
+          <ul class="nav navbar-nav">
+            <li>
+              <a href="#professional/all">Professional</a>
+            </li>
+            <li>
+              <a href="#personal/all">Personal</a>
+            </li>
+          </ul>
+
+          <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="download">Other Links <span class="caret"></span></a>
+              <ul class="dropdown-menu" aria-labelledby="download">
+                <li>
+                  <a href="http://static.angelbob.com/resume">Resume</a>
+                </li>
+                <li>
+                  <a href="http://codefol.io">Blog</a>
+                </li>
+                <li>
+                  <a href="http://rebuilding-rails.com">Rebuilding Rails (my book)</a>
+                </li>
+                <li>
+                  <a href="http://github.com/noahgibbs">GitHub</a>
+                </li>
+                <li>
+                  <a href="http://twitter.com/codefolio">Twitter</a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+
+        </div>
+      </div>
+    </div>
+
+
+    <div class="container"><div class="row">
+
+<div style="height:80px;"> </div>
+
+<div id="tagbox" style="height:80px;"> </div> <!-- For sub-buttons -->
+
+<!-- This is the HTML template for individual portfolio entries. -->
+<div id="template" class="panel panel-warning" style="display:none">
+  <div class="panel-heading"><h3><div class="title_here"></div></h3></div>
+  <div class="panel-body">
+    <div class="row well">
+      <div class="col-md-4"><div class="dates_here">
+        <b>Dates:</b>
+      </div></div>
+      <div class="col-md-8"><div class="description_here">
+        <b>Description:</b>
+      </div></div>
+    </div>
+
+    <div class="row well">
+      <div class="col-md-4"><div class="tools_here">
+        <b>Tools:</b>
+      </div></div>
+      <div class="col-md-4"><div class="role_here">
+        <b>Role:</b>
+      </div></div>
+      <div class="col-md-4"><div class="organization_here">
+        <b>Organization:</b>
+      </div></div>
+    </div>
+
+    <div class="row"><div class="col-md-12">
+      <div class="alert alert-success">
+        <div class="pictures_here">
+          <b>Pictures:</b><br/>
+        </div>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+
+<div data-category="professional" data-tags="ruby rails cassandra">
+  <div class="title">Analytics for Ooyala</div>
+  <div class="dates"> 2011-2012 </div>
+  <div class="organization"> <a href="http://ooyala.com">Ooyala</a> </div>
+  <div class="description"> Ooyala's Backlot </div>
+  <div class="tools"> Ruby, Rails, git, Cassandra, MySQL, others </div>
+  <div class="role"> Analytics and Big Data Engineer </div>
+  <div class="pictures">
+    <a class="fancybox" href="ooyala-backlot-analytics-1.png">
+      <img src="ooyala-backlot-analytics-1.png" alt="Ooyala Backlot 1" /> </a>
+    <a class="fancybox" href="ooyala-backlot-2.jpg">
+      <img src="ooyala-backlot-2.jpg" alt="Ooyala Backlot 2" /> </a>
+  </div>
+</div>
+
+<!-- ... -->
+
+
+</div>  <!-- Bootstrap Container -->
+
+</body>
